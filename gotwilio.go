@@ -2,6 +2,7 @@
 package gotwilio
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"path"
@@ -75,15 +76,21 @@ func (twilio *Twilio) getBasicAuthCredentials() (string, string) {
 	return twilio.AccountSid, twilio.AuthToken
 }
 
-func (twilio *Twilio) post(formValues url.Values, twilioUrl string) (*http.Response, error) {
+func (twilio *Twilio) postWithContext(ctx context.Context, formValues url.Values, twilioUrl string) (*http.Response, error) {
 	req, err := http.NewRequest("POST", twilioUrl, strings.NewReader(formValues.Encode()))
 	if err != nil {
 		return nil, err
 	}
 	req.SetBasicAuth(twilio.getBasicAuthCredentials())
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
 	return twilio.do(req)
+}
+
+func (twilio *Twilio) post(formValues url.Values, twilioUrl string) (*http.Response, error) {
+	return twilio.postWithContext(nil, formValues, twilioUrl)
 }
 
 func (twilio *Twilio) get(twilioUrl string) (*http.Response, error) {

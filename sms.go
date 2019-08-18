@@ -1,6 +1,7 @@
 package gotwilio
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -46,11 +47,11 @@ func (sms *SmsResponse) DateSentAsTime() (time.Time, error) {
 
 // SendSMS uses Twilio to send a text message.
 // See http://www.twilio.com/docs/api/rest/sending-sms for more information.
-func (twilio *Twilio) SendSMS(from, to, body, statusCallback, applicationSid string) (smsResponse *SmsResponse, exception *Exception, err error) {
+func (twilio *Twilio) SendSMS(ctx context.Context, from, to, body, statusCallback, applicationSid string) (smsResponse *SmsResponse, exception *Exception, err error) {
 	formValues := initFormValues(to, body, "", statusCallback, applicationSid)
 	formValues.Set("From", from)
 
-	smsResponse, exception, err = twilio.sendMessage(formValues)
+	smsResponse, exception, err = twilio.sendMessage(ctx, formValues)
 	return
 }
 
@@ -86,25 +87,25 @@ func (twilio *Twilio) GetSMS(sid string) (smsResponse *SmsResponse, exception *E
 
 // SendSMSWithCopilot uses Twilio Copilot to send a text message.
 // See https://www.twilio.com/docs/api/rest/sending-messages-copilot
-func (twilio *Twilio) SendSMSWithCopilot(messagingServiceSid, to, body, statusCallback, applicationSid, mediaUrl string) (smsResponse *SmsResponse, exception *Exception, err error) {
+func (twilio *Twilio) SendSMSWithCopilot(ctx context.Context, messagingServiceSid, to, body, statusCallback, applicationSid, mediaUrl string) (smsResponse *SmsResponse, exception *Exception, err error) {
 	formValues := initFormValues(to, body, mediaUrl, statusCallback, applicationSid)
 	formValues.Set("MessagingServiceSid", messagingServiceSid)
 
-	smsResponse, exception, err = twilio.sendMessage(formValues)
+	smsResponse, exception, err = twilio.sendMessage(ctx, formValues)
 	return
 }
 
 // SendMMS uses Twilio to send a multimedia message.
-func (twilio *Twilio) SendMMS(from, to, body, mediaUrl, statusCallback, applicationSid string) (smsResponse *SmsResponse, exception *Exception, err error) {
+func (twilio *Twilio) SendMMS(ctx context.Context, from, to, body, mediaUrl, statusCallback, applicationSid string) (smsResponse *SmsResponse, exception *Exception, err error) {
 	formValues := initFormValues(to, body, mediaUrl, statusCallback, applicationSid)
 	formValues.Set("From", from)
 
-	smsResponse, exception, err = twilio.sendMessage(formValues)
+	smsResponse, exception, err = twilio.sendMessage(ctx, formValues)
 	return
 }
 
 // Core method to send message
-func (twilio *Twilio) sendMessage(formValues url.Values) (smsResponse *SmsResponse, exception *Exception, err error) {
+func (twilio *Twilio) sendMessage(ctx context.Context, formValues url.Values) (smsResponse *SmsResponse, exception *Exception, err error) {
 	twilioUrl := twilio.BaseUrl + "/Accounts/" + twilio.AccountSid + "/Messages.json"
 
 	res, err := twilio.post(formValues, twilioUrl)
