@@ -108,7 +108,7 @@ func (twilio *Twilio) SendMMS(ctx context.Context, from, to, body, mediaUrl, sta
 func (twilio *Twilio) sendMessage(ctx context.Context, formValues url.Values) (smsResponse *SmsResponse, exception *Exception, err error) {
 	twilioUrl := twilio.BaseUrl + "/Accounts/" + twilio.AccountSid + "/Messages.json"
 
-	res, err := twilio.post(formValues, twilioUrl)
+	res, err := twilio.postWithContext(ctx, formValues, twilioUrl)
 	if err != nil {
 		return smsResponse, exception, err
 	}
