@@ -13,6 +13,7 @@ import (
 const (
 	baseURL       = "https://api.twilio.com/2010-04-01"
 	videoURL      = "https://video.twilio.com"
+	lookupURL     = "https://lookups.twilio.com/v1/PhoneNumbers"
 	clientTimeout = time.Second * 30
 )
 
@@ -28,6 +29,7 @@ type Twilio struct {
 	AuthToken  string
 	BaseUrl    string
 	VideoUrl   string
+	LookupUrl  string
 	HTTPClient *http.Client
 
 	APIKeySid    string
@@ -58,6 +60,7 @@ func NewTwilioClientCustomHTTP(accountSid, authToken string, HTTPClient *http.Cl
 		AuthToken:  authToken,
 		BaseUrl:    baseURL,
 		VideoUrl:   videoURL,
+		LookupUrl:  lookupURL,
 		HTTPClient: HTTPClient,
 	}
 }
@@ -93,14 +96,21 @@ func (twilio *Twilio) post(formValues url.Values, twilioUrl string) (*http.Respo
 	return twilio.postWithContext(nil, formValues, twilioUrl)
 }
 
-func (twilio *Twilio) get(twilioUrl string) (*http.Response, error) {
+func (twilio *Twilio) getWithContext(ctx context.Context, twilioUrl string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", twilioUrl, nil)
 	if err != nil {
 		return nil, err
 	}
 	req.SetBasicAuth(twilio.getBasicAuthCredentials())
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
 
 	return twilio.do(req)
+}
+
+func (twilio *Twilio) get(twilioUrl string) (*http.Response, error) {
+	return twilio.getWithContext(nil, twilioUrl)
 }
 
 func (twilio *Twilio) delete(twilioUrl string) (*http.Response, error) {
