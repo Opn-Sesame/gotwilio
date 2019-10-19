@@ -35,7 +35,7 @@ func (twilio *Twilio) Lookup(ctx context.Context, number, lookupType string) (*L
 		return nil, nil, err
 	}
 
-	u.Path += number
+	u.Path += "/" + number
 	params := url.Values{}
 	params.Add("Type", lookupType)
 	u.RawQuery = params.Encode()
