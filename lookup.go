@@ -10,7 +10,7 @@ import (
 
 // Carrier is the carrier information returned via a lookup.
 type Carrier struct {
-	ErrorCode         string `json:"error_code"`
+	ErrorCode         int `json:"error_code"`
 	MobileCountryCode string `json:"mobile_country_code"`
 	MobileNetworkCode string `json:"mobile_network_code"`
 	Name              string `json:"name"`
